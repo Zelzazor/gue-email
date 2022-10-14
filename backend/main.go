@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"io/ioutil"
 	"net/http"
 	"os"
@@ -88,7 +89,7 @@ func search(c *gin.Context) {
 		return
 	}
 
-	req, err := http.NewRequest("POST", "http://localhost:4080/api/email/_search", strings.NewReader(string(jsonBody)))
+	req, err := http.NewRequest("POST", fmt.Sprintf(`%s/api/email/_search`, os.Getenv("ZINC_URL")), strings.NewReader(string(jsonBody)))
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -128,5 +129,5 @@ func main() {
 	router.Use(cors.Default())
 	router.GET("/search", search)
 
-	router.Run("localhost:8000")
+	router.Run(os.Getenv("APP_URL"))
 }
