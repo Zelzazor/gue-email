@@ -15,23 +15,24 @@ interface Email {
   read: boolean;
 }
 
-fetch('http://localhost:8000/search')
-  .then(response => response.json())
-  .then(json => {
-    emails.value = json.hits.hits.map((hit: any) => {
-      return {
-        id: hit._id,
-        from: hit._source.From,
-        to: hit._source.To,
-        subject: hit._source.Subject,
-        content: hit._source.Content,
-        date: hit._source.Date
-      }
-    });
-    count.value = json.hits.total.value;
-    
-    
-  })
+const getEmails = () => {
+  fetch(`${import.meta.env.VITE_BACKEND_URL}/search?q=${query.value}&limit=${limit.value}&offset=${offset.value}`)
+    .then(response => response.json())
+    .then(json => {
+      emails.value = json.hits.hits.map((hit: any) => {
+        return {
+          id: hit._id,
+          from: hit._source.From,
+          to: hit._source.To,
+          subject: hit._source.Subject,
+          content: hit._source.Content,
+          date: hit._source.Date
+        }
+      });
+      count.value = json.hits.total.value;
+    })
+}
+
 
 const selectedEmail = ref<Email | null>(null)
 
@@ -56,22 +57,7 @@ const submitSearch = (e: Event) => {
 
 const search = (e: Event) => {
   e.preventDefault()
-  
-  fetch(`http://localhost:8000/search?q=${query.value}&limit=${limit.value}&offset=${offset.value}`)
-    .then(response => response.json())
-    .then(json => {
-      emails.value = json.hits.hits.map((hit: any) => {
-        return {
-          id: hit._id,
-          from: hit._source.From,
-          to: hit._source.To,
-          subject: hit._source.Subject,
-          content: hit._source.Content,
-          date: hit._source.Date
-        }
-      });
-      count.value = json.hits.total.value;
-    })
+  getEmails()
 }
 
 const next = () => {
@@ -83,6 +69,8 @@ const prev = () => {
   offset.value -= limit.value
   search(new Event('submit'))
 }
+
+getEmails();
 </script>
 
 <template>
